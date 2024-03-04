@@ -1,0 +1,54 @@
+server:
+  port: 8080
+
+spring:
+  main:
+    allow-circular-references: true
+  cloud:
+    gateway:
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+        - AddResponseHeader=Access-Control-Allow-Origin, *
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedHeaders: "*"
+            allowedMethods: "*"
+      routes:
+        - id: identity
+          uri: lb://identity
+          predicates:
+            - Path=/auth/**
+          filters:
+            - AuthenticationFilterFactory
+        - id: product
+          uri: http://localhost:8082
+          predicates:
+            - Path=/products/**
+        - id: admin-product
+          uri: http://localhost:8082
+          predicates:
+            - Path=/admin/products/**
+        - id: cart
+          uri: http://localhost:8083
+          predicates:
+            - Path=/cart/**
+        - id: wishlist
+          uri: http://localhost:8084
+          predicates:
+            - Path=/wishlist/**
+        - id: order
+          uri: http://localhost:8085
+          predicates:
+            - Path=/orders/**
+ 
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+
+logging:
+  level:
+    root: warn
